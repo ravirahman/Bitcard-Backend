@@ -12,6 +12,8 @@ var grant = new Grant();
 var request = require('request');
 var firebase = require('firebase');
 
+console.log("coinbase id", process.env.COINBASE_CLINET_ID);
+
 const server = new Hapi.Server();
 server.connection({ port: process.env.PORT || 3000 });
 server.app.firebase = firebase.initializeApp({
