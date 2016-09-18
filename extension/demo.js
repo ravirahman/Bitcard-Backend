@@ -77,17 +77,17 @@ app.controller('formController', function($scope, $location, $http) {
      });
 
     $scope.continue = function () {
-
-      $http.post('https://bitcard-backend.herokuapp.com/create_capital_one_customer', $scope.user, config).then(function(user) {
+        console.log($scope.user);
+      $http.post('https://bitcard-backend.herokuapp.com/create_capital_one_customer', $scope.user).then(function(user) {
           chrome.storage.sync.set({
               "c1_account": true,
           }, function() {
               // Notify that we saved.
-              $location.path("/amount");
+              //$location.path("/amount");
           });
 
       }, function(err) {
-            alert(err);
+            console.error(err);
       });
 
     };

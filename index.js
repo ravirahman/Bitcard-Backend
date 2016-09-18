@@ -16,7 +16,11 @@ const querystring = require('querystring');
 console.log("coinbase id", process.env.COINBASE_CLIENT_ID);
 
 const server = new Hapi.Server();
-server.connection({ port: process.env.PORT || 3000 });
+server.connection(
+    { port: process.env.PORT || 3000,
+      routes: { cors: true }
+    }
+);
 server.app.firebase = firebase.initializeApp({
     serviceAccount: JSON.parse(Buffer.from(process.env.GOOGLE_API_SECRET_CONFIG, 'base64')),
     databaseURL: process.env.FIREBASE_DB_URL
