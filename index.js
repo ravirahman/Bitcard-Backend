@@ -79,8 +79,8 @@ server.register([
             var access_token = req.query.access_token;
             var refresh_token = req.query.refresh_token;
             var client = new Client({
-                'accessToken': request.payload.access_token,
-                'refreshToken': request.payload.refresh_token
+                'accessToken': access_token,
+                'refreshToken':refresh_token
             });
             client.getCurrentUser((err, result) => {
                 if (err) return reply(err);
