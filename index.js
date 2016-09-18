@@ -98,7 +98,7 @@ server.register([
                     };
                     var has_cb_id = snapshot.hasChild(uid);
                     if (has_cb_id) {
-                        answer[c1_id] = snapshot.child(uid).val();
+                        answer["c1_id"] = snapshot.child(uid).val();
                     }
                     let qs_ans = querystring.stringify(answer);
                     return reply.redirect(`chrome-extension://jbhaeeplonafkglmanjflfaocajafnfd/oauth_callback.html?${qs_ans}`);
