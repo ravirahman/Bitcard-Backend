@@ -33,7 +33,8 @@ module.exports = (server) => {
                     },
                     callback: (err,data) => {
                         if (err) return reply(err).status(500);
-                        return reply(data);
+                        console.log("processed transaction");
+                        return reply({"success": true});
                     }
                 });
             }
