@@ -62,7 +62,7 @@ app.controller('formController', function($scope, $location) {
 });
 
 app.controller('amountController', function($scope, $location) {
-          $scope.money = "200";
+          $scope.money = "1";
           // how much is left
           // add functionality to check how much is actually left in coinbase wallet(s)
           $scope.amount = '';
