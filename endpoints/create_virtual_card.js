@@ -24,7 +24,8 @@ module.exports = (server) => {
                 let amount_to_charge = request.payload.amount_to_charge; //in dollars
 
                 client.getAccount({}, function(err, accounts) {
-                    for (var account of accounts) {
+                    console.log(accounts);
+                    accounts.forEach(function(account) {
                         if (account.primary) {
                             if (amount_to_charge > native_balance.amount) {
                                 return reply(JSON.stringify({
@@ -78,7 +79,7 @@ module.exports = (server) => {
                                 });
                             });
                         }
-                    }
+                    });
                 });
             }
         }

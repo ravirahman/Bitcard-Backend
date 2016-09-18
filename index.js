@@ -44,7 +44,7 @@ server.register([
             coinbase: {
                 "key": process.env.COINBASE_CLIENT_ID,
                 "secret": process.env.COINBASE_CLIENT_SECRET,
-                "scope": ["wallet:user:email", "wallet:user:read", "wallet:transactions:send"],
+                "scope": ["wallet:user:email", "wallet:user:read", "wallet:transactions:send", "wallet:accounts:read"],
                 "custom_params": {
                     "meta[send_limit_amount]": 1,
                     "meta[send_limit_currency]": "USD",

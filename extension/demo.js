@@ -29,7 +29,7 @@ app.config(function($routeProvider) {
 app.controller('mainController', function($scope, $location) {
     chrome.storage.sync.get(null, function(items) {
         var allKeys = Object.keys(items);
-        console.log(allKeys);
+        console.log(items);
         if (items.hasOwnProperty("coinbase_access_key") && items.hasOwnProperty("coinbase_refresh_token")) {
             $location.path("/form");
         }
@@ -65,6 +65,12 @@ app.controller('formController', function($scope, $location) {
      });
 
     $scope.continue = function () {
+        $http.post('/someUrl', data, config).then(function(data) {
+
+        }, function(err) {
+
+        });
+
       $location.path("/amount");
     };
 });
