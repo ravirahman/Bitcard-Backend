@@ -3,7 +3,10 @@ module.exports = (server) => {
         method: ['GET','POST'],
         path: '/create_virtual_card',
         config: {
-            auth: 'coinbase',
+            auth: {
+                mode: 'required',
+                strategy: 'simple'
+            },
             handler: (request, reply) => {
                 reply('hello, ' + JSON.stringify(request));
             }

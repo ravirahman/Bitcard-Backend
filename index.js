@@ -7,6 +7,7 @@ const path = require("path");
 const firebase = require('firebase');
 const bell = require("bell");
 const coinbase = require('coinbase');
+var Client = require('coinbase').Client;
 var Grant = require('grant-hapi');
 var grant = new Grant();
 
@@ -16,8 +17,6 @@ server.app.firebase = firebase.initializeApp({
     serviceAccount: JSON.parse(Buffer.from(process.env.GOOGLE_API_SECRET_CONFIG, 'base64')),
     databaseURL: process.env.FIREBASE_DB_URL
 });
-
-server.connection({ port: 8000 });
 
 server.register([
     { // REQUIRED:
@@ -35,12 +34,19 @@ server.register([
             server: {
                 protocol: process.env.PROTOCOL,
                 host: process.env.HOST,
-                state: true
+                state: true,
+                callback: "/callback"
             },
             coinbase: {
                 "key": process.env.COINBASE_CLINET_ID,
                 "secret": process.env.COINBASE_CLIENT_SECRET,
-                "scope": ["wallet:user:email", "wallet:user:read", "wallet:transaction:send"],
+                "scope": ["wallet:user:email", "wallet:user:read", "wallet:transactions:send"],
+                "custom_params": {
+                    "meta[send_limit_amount]": 1,
+                    "meta[send_limit_currency]": "USD",
+                    "meta[send_limit_period]": "week"
+                },
+                "callback": "/callback/coinbase"
         },}
     },
     require('hapi-auth-bearer-token')
@@ -78,12 +84,21 @@ server.register([
             });
         }
     });
-    server.auth.default('simple');
 
     server.route({
-        method: ['GET', 'POST'],
-        path: '/connect/coinbase/callback',
+        method: ['GET'],
+        path: '/callback/{provider}',
         handler: function (req, reply) {
+            var access_token = req.query.access_token;
+            var refresh_token = req.query.refresh_token;
+            //todo verify scopes
+            var client = new Client({'accessToken': access_token, 'refreshToken': refresh_token});
+            client.getCurrentUser((err, result) => {
+                if (err) throw err;
+                let uid = result.id;
+                let name = result.name;
+            });
+
             var userId = "";
             console.log(req.query);
             //todo exchange code for coinbase access key
@@ -92,8 +107,8 @@ server.register([
                 //todo create capital one customer
             //todo return the coinbase access key, refresh key, and firebase access token
             reply(JSON.stringify({
-                coinbase_access_key: "",
-                coinbase_refresh_token: "",
+                coinbase_access_key: access_token,
+                coinbase_refresh_token: refresh_token,
                 firebase_access_token: server.app.firebase.auth().createCustomToken(userId)
             }))
     }});
@@ -102,6 +117,6 @@ server.register([
         if (err) {
             throw err;
         }
-        //console.log(`Server running at: ${server.info.uri}`);
+        console.log(`Server running at: ${server.info.uri}`);
     });
 });
