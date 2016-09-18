@@ -59,16 +59,19 @@ app.controller('formController', function($scope, $location, $http) {
         if (items.hasOwnProperty("c1_account")) {
             $location.path("/amount");
         }
+        $scope.user = {
+            firstName: '',
+            lastName: '',
+            address: '',
+            address2: '',
+            city: '',
+            state: '',
+            postalCode: '',
+            access_token: items["coinbase_access_key"],
+            refresh_token: items["coinbase_refresh_token"]
+        };
     });
-    $scope.user = {
-      firstName: '',
-      lastName: '',
-      address: '',
-      address2: '',
-      city: '',
-      state: '',
-      postalCode: ''
-    };
+
 
     $scope.states = ('AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS ' +
    'MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI ' +
@@ -83,7 +86,7 @@ app.controller('formController', function($scope, $location, $http) {
               "c1_account": true,
           }, function() {
               // Notify that we saved.
-              //$location.path("/amount");
+              $location.path("/amount");
           });
 
       }, function(err) {
@@ -93,7 +96,7 @@ app.controller('formController', function($scope, $location, $http) {
     };
 });
 
-app.controller('amountController', function($scope, $location) {
+app.controller('amountController', function($scope, $location, $http) {
           $scope.money = "1";
           // how much is left
           // add functionality to check how much is actually left in coinbase wallet(s)
@@ -110,8 +113,9 @@ app.controller('amountController', function($scope, $location) {
                       amount_to_charge: $scope.amount,
                       access_token: items["coinbase_access_key"],
                       refresh_token: items["coinbase_refresh_token"]
-                  }, config).then(function(data) {
-                      cardNumber = data.account_number;
+                  }).then(function(data) {
+                      console.log("data",data);
+                      cardNumber = data.data.objectCreated.account_number;
                       $location.path("/info");
                   }, function(err) {
                         alert(JSON.stringify(err));
