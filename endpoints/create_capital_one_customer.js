@@ -36,14 +36,14 @@ module.exports = (server) => {
                         return request_lib.post(`http://api.reimaginebanking.com/customers?key=${process.env.CAPITAL_ONE_SECRET_KEY}`,{
                             json: true,
                             body: {
-                                "first_name": request.payload.first_name,
-                                "last_name": request.payload.last_name,
+                                "first_name": request.payload.firstName,
+                                "last_name": request.payload.lastName,
                                 "address": {
-                                    "street_number": request.payload.street_number,
-                                    "street_name": request.payload.street_name,
+                                    "street_number": request.payload.address,
+                                    "street_name": request.payload.address2,
                                     "city": request.payload.city,
                                     "state": request.payload.state,
-                                    "zip": `${request.payload.zip}`
+                                    "zip": `${request.payload.postalCode}`
                                 }
 
                             },
