@@ -4,12 +4,13 @@ const Hapi = require('hapi');
 var yar = require('yar');
 const recursive = require('recursive-readdir');
 const path = require("path");
-const firebase = require('firebase');
 const bell = require("bell");
 const coinbase = require('coinbase');
 var Client = require('coinbase').Client;
 var Grant = require('grant-hapi');
 var grant = new Grant();
+var request = require('request');
+var firebase = require('firebase');
 
 const server = new Hapi.Server();
 server.connection({ port: process.env.PORT || 3000 });
@@ -48,8 +49,7 @@ server.register([
                 },
                 "callback": "/callback/coinbase"
         },}
-    },
-    require('hapi-auth-bearer-token')
+    }
 ], function (err) {
     if (err) {
         throw err
@@ -69,49 +69,39 @@ server.register([
         }
     });
 
-    server.auth.strategy('simple', 'bearer-access-token', {
-        allowQueryToken: false,
-        allowMultipleHeaders: false,
-        validateFunc: function (authToken, callback) {
-            // idToken comes from the client app (shown above)
-            server.app.firebase.auth().verifyIdToken(authToken).then(function(decodedToken) {
-                var uid = decodedToken.uid;
-                callback(null,true,{authToken: authToken, user: decodedToken});
-                // ...
-            }).catch(function(error) {
-                // Handle error
-                callback(null,false);
-            });
-        }
-    });
-
     server.route({
         method: ['GET'],
         path: '/callback/{provider}',
         handler: function (req, reply) {
             var access_token = req.query.access_token;
             var refresh_token = req.query.refresh_token;
-            //todo verify scopes
-            var client = new Client({'accessToken': access_token, 'refreshToken': refresh_token});
-            client.getCurrentUser((err, result) => {
-                if (err) throw err;
-                let uid = result.id;
-                let name = result.name;
+            var client = new Client({
+                'accessToken': request.payload.access_token,
+                'refreshToken': request.payload.refresh_token
             });
+            client.getCurrentUser((err, result) => {
+                if (err) return reply(err);
+                let uid = result.id;
 
-            var userId = "";
-            console.log(req.query);
-            //todo exchange code for coinbase access key
-            //todo look up if customer is new or existing. if new,
-                //todo get profile information from coinbase (first name, last name, address), populate in firebase
-                //todo create capital one customer
-            //todo return the coinbase access key, refresh key, and firebase access token
-            reply(JSON.stringify({
-                coinbase_access_key: access_token,
-                coinbase_refresh_token: refresh_token,
-                firebase_access_token: server.app.firebase.auth().createCustomToken(userId)
-            }))
-    }});
+                var db = server.app.firebase.database();
+                var ref = db.ref();
+
+                ref.once("value", function (snapshot) {
+                    var answer = {
+                        coinbase_access_key: access_token,
+                        coinbase_refresh_token: refresh_token,
+                        coinbase_uid: uid
+                        //firebase_access_token: server.app.firebase.auth().createCustomToken(uid)
+                    };
+                    var has_cb_id = snapshot.hasChild(uid);
+                    if (has_cb_id) {
+                        answer[c1_id] = snapshot.child(uid).val();
+                    }
+                    return reply(answer);
+                });
+            });
+        }
+    });
 
     server.start((err) => {
         if (err) {

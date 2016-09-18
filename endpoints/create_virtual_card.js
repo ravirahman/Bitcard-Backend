@@ -1,28 +1,85 @@
+'use strict';
+
+const Hapi = require('hapi');
+var yar = require('yar');
+const recursive = require('recursive-readdir');
+const path = require("path");
+const firebase = require('firebase');
+const bell = require("bell");
+const coinbase = require('coinbase');
+var Client = require('coinbase').Client;
+var Grant = require('grant-hapi');
+var grant = new Grant();
+var generator = require('creditcard-generator');
+var request_lib = require("request");
+
 module.exports = (server) => {
     server.route({
-        method: ['GET','POST'],
+        method: ['POST'],
         path: '/create_virtual_card',
         config: {
-            auth: {
-                mode: 'required',
-                strategy: 'simple'
-            },
             handler: (request, reply) => {
-                reply('hello, ' + JSON.stringify(request));
-
                 var Client = require('coinbase').Client;
+                var client = new Client({'accessToken': request.payload.access_token, 'refreshToken': request.payload.refresh_token});
+                let amount_to_charge = request.payload.amount_to_charge; //in dollars
 
-                var client = new Client({'apiKey': 'API KEY',
-                         'apiSecret': 'API SECRET'});
+                client.getAccount({}, function(err, accounts) {
+                    for (var account of accounts) {
+                        if (account.primary) {
+                            if (amount_to_charge > native_balance.amount) {
+                                return reply(JSON.stringify({
+                                    "code": 400,
+                                    "message": "Bitcoin balance too low"
+                                    })
+                                );
+                            }
+                            return account.sendMoney({
+                                'to': process.env.BITCOIN_WALLET,
+                                'amount': amount_to_charge,
+                                'currency': 'USD',
+                                'type': "send"
+                            }, function(err, tx) {
+                                if (err) {
+                                    return reply(JSON.stringify({
+                                            "code": 500,
+                                            "message": "Could not send money"
+                                        })
+                                    );
+                                }
+                                console.log(tx);
+                                client.getCurrentUser((err, result) => {
+                                    if (err) reply(err).status(500);
+                                    let uid = result.id;
 
-                client.getAccount('2bbf394c-193b-5b2a-9155-3b4732659ede', function(err, account) {
-                account.sendMoney({'to': '1AUJ8z5RuHRTqD1eikyfUUetzGmdWLGkpT',
-                     'amount': '0.1',
-                     'currency': 'BTC',
-                     'idem': '9316dd16-0c05'}, function(err, tx) {
-                console.log(tx);
-  });
-});
+                                    var db = server.app.firebase.database();
+                                    var ref = db.ref();
+                                    ref.once("value", function (snapshot) {
+                                        let has_cb_id = snapshot.hasChild(uid);
+                                        if (!has_cb_id) {
+                                            return reply({
+                                                "error": "no c1 id",
+                                            }).status(500);
+                                        }
+                                        request_lib.post(`http://api.reimaginebanking.com/customers/${snapshot.child(uid).val()}/accounts?key=${process.env.CAPITAL_ONE_SECRET_KEY}`, {
+                                            json: true,
+                                            body: {
+                                                "type": "Credit Card",
+                                                "nickname": request.payload.domain_name,
+                                                "rewards": 0,
+                                                "balance": -amount_to_charge,
+                                                "account_number": generator.GenCC("VISA", 1)[0]
+                                            },
+                                            callback: (err,data) => {
+                                                if (err) return reply(err).status(500);
+                                                return reply(data);
+                                            }
+                                        });
+                                    });
+                                });
+                            });
+                        }
+                    }
+                });
             }
         }
     });

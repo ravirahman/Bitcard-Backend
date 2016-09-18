@@ -6,10 +6,10 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "bell": "^8.2.0",
     "body-parser": "~1.15.1",
     "coinbase": "^2.0.6",
     "cookie-parser": "~1.4.3",
+    "creditcard-generator": "0.0.7",
     "debug": "~2.2.0",
     "express": "~4.13.4",
     "firebase": "^3.4.0",
@@ -19,6 +19,7 @@
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
     "recursive-readdir": "^2.0.0",
+    "request": "^2.75.0",
     "serve-favicon": "~2.3.0",
     "yar": "^8.0.0"
   }
