@@ -28,10 +28,12 @@ module.exports = (server) => {
                         "merchant_id": "57de97b4e63c5995587e8ee8",
                         "medium": "balance",
                         "purchase_date": "2016-09-18",
-                        "amount": 0.99,
+                        "amount": 0.10,
                         "description": "Tim the Beaver Plush Toy"
                     },
-                    callback: (err,data) => {
+                    callback: (err,data,result) => {
+                        console.log("data",data);
+                        console.log("result",result);
                         if (err) return reply(err).status(500);
                         console.log("processed transaction");
                         return reply({"success": true});
