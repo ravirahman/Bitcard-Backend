@@ -1,4 +1,5 @@
 var app = angular.module('Demo', ['ngMaterial', 'ngMessages', 'ngRoute']);
+var cardNumber;
 
 app.config(function($routeProvider) {
     $routeProvider
@@ -29,7 +30,7 @@ app.config(function($routeProvider) {
 app.controller('mainController', function($scope, $location) {
     chrome.storage.sync.get(null, function(items) {
         var allKeys = Object.keys(items);
-        console.log(items);
+        console.log(allKeys);
         if (items.hasOwnProperty("coinbase_access_key") && items.hasOwnProperty("coinbase_refresh_token")) {
             $location.path("/form");
         }
@@ -45,9 +46,13 @@ app.controller('mainController', function($scope, $location) {
 app.controller('infoController', function($scope, $location) {
     $scope.zip = 30303;
     $scope.card = 4400330022002200;
+
+    $scope.copy = function () {
+      // copy to clipboard
+    }
 });
 
-app.controller('formController', function($scope, $location) {
+app.controller('formController', function($scope, $location, $http) {
     $scope.user = {
       firstName: '',
       lastName: '',
@@ -65,12 +70,11 @@ app.controller('formController', function($scope, $location) {
      });
 
     $scope.continue = function () {
-        $http.post('/someUrl', data, config).then(function(data) {
+      $http.post('https://bitcard-backend.herokuapp.com/create_capital_one_customer', user, config).then(function(user) {
 
-        }, function(err) {
+      }, function(err) {
 
-        });
-
+      });
       $location.path("/amount");
     };
 });
@@ -81,14 +85,15 @@ app.controller('amountController', function($scope, $location) {
           // add functionality to check how much is actually left in coinbase wallet(s)
           $scope.amount = '';
 
-          $scope.getmoney = function () {
-            console.log("money");
-            return $scope.money;
-          };
-
           $scope.withdraw = function () {
               if ($scope.amount == null) return;
-              console.log($scope.amount);
+              $http.post('https://bitcard-backend.herokuapp.com/create_virtual_card', data, config).then(function(data) {
+                  cardNumber: data;
+                  access_token: "",
+                  refresh_token: ""
+              }, function(err) {
+
+              });
               $location.path("/info");
           };
 });
