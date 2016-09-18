@@ -9,8 +9,11 @@ window.onload = function() {
         return result;
     }
     var qp = getJsonFromUrl();
+    console.log("qp",qp);
     chrome.storage.sync.set(qp, function() {
         // Notify that we saved.
-        message('Settings saved');
+        var daddy = window.self;
+        daddy.opener = window.self;
+        daddy.close();
     });
 };
