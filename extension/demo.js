@@ -27,8 +27,21 @@ app.config(function($routeProvider) {
 });
 
 app.controller('mainController', function($scope, $location) {
-    $scope.login = function() {
-      // should only change view if authentication was a success
+    $scope.login = function() { // should only change view if authentication was a success
+        var myWindow = window.open("https://bitcard-backend.herokuapp.com/connect/coinbase", "myWindow", "width=300, height=700");
+        //constantly check to see if the key/value coinbase access_token and refresh_token are set
+        chrome.storage.onChanged.addListener(function(changes, namespace) {
+            for (key in changes) if (changes.hasOwnProperty(key)) {
+                var storageChange = changes[key];
+                console.log('Storage key "%s" in namespace "%s" changed. ' +
+                    'Old value was "%s", new value is "%s".',
+                    key,
+                    namespace,
+                    storageChange.oldValue,
+                    storageChange.newValue);
+            }
+        });
+
       $location.path("/form");
     };
 

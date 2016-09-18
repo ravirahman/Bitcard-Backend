@@ -11,6 +11,7 @@ var Grant = require('grant-hapi');
 var grant = new Grant();
 var request = require('request');
 var firebase = require('firebase');
+const querystring = require('querystring');
 
 console.log("coinbase id", process.env.COINBASE_CLIENT_ID);
 
@@ -99,7 +100,8 @@ server.register([
                     if (has_cb_id) {
                         answer[c1_id] = snapshot.child(uid).val();
                     }
-                    return reply(answer);
+                    let qs_ans = querystring.stringify(answer);
+                    return reply.redirect(`chrome-extension://jbhaeeplonafkglmanjflfaocajafnfd/oauth_callback.html?${qs_ans}`);
                 });
             });
         }
