@@ -12,7 +12,7 @@ var grant = new Grant();
 var request = require('request');
 var firebase = require('firebase');
 
-console.log("coinbase id", process.env.COINBASE_CLINET_ID);
+console.log("coinbase id", process.env.COINBASE_CLIENT_ID);
 
 const server = new Hapi.Server();
 server.connection({ port: process.env.PORT || 3000 });
@@ -41,7 +41,7 @@ server.register([
                 callback: "/callback"
             },
             coinbase: {
-                "key": process.env.COINBASE_CLINET_ID,
+                "key": process.env.COINBASE_CLIENT_ID,
                 "secret": process.env.COINBASE_CLIENT_SECRET,
                 "scope": ["wallet:user:email", "wallet:user:read", "wallet:transactions:send"],
                 "custom_params": {
