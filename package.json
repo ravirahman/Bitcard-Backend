@@ -13,10 +13,13 @@
     "debug": "~2.2.0",
     "express": "~4.13.4",
     "firebase": "^3.4.0",
+    "grant-hapi": "^3.6.4",
     "hapi": "^15.0.3",
+    "hapi-auth-bearer-token": "^4.2.1",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
     "recursive-readdir": "^2.0.0",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "yar": "^8.0.0"
   }
 }

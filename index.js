@@ -1,11 +1,14 @@
 'use strict';
 
 const Hapi = require('hapi');
+var yar = require('yar');
 const recursive = require('recursive-readdir');
 const path = require("path");
 const firebase = require('firebase');
 const bell = require("bell");
 const coinbase = require('coinbase');
+var Grant = require('grant-hapi');
+var grant = new Grant();
 
 const server = new Hapi.Server();
 server.connection({ port: process.env.PORT || 3000 });
@@ -16,30 +19,35 @@ server.app.firebase = firebase.initializeApp({
 
 server.connection({ port: 8000 });
 
-// Register bell with the server
-server.register(bell, function (err) {
-
-    server.auth.strategy('coinbase', 'bell', {
-        provider: {
-            protocol: 'oauth2',
-            auth: 'https://www.coinbase.com/oauth/authorize',
-            token: 'http://www.coinbase.com/oauth/token',
-            scope: ["wallet:user:email", "wallet:user:read", "wallet:transaction:send"],
-            profile: function(credentials, params, get, callback) {
-
-                console.log("credentials",credentials);
-                console.log("params", params);
-                callback();
+server.register([
+    { // REQUIRED:
+        register: yar,
+        options: {
+            cookieOptions: {
+                password: process.env.COOKIE_PASSWORD,
+                isSecure: false
+            }
+        }
+    },
+    { // mount grant
+        register: grant,
+        options: {
+            server: {
+                protocol: process.env.PROTOCOL,
+                host: process.env.HOST,
+                state: true
             },
-            clientId: process.env.COINBASE_CLINET_ID,
-            clientSecret: process.env.COINBASE_CLIENT_SECRET,
-            forceHttps: true
-        },
-        clientId: process.env.COINBASE_CLINET_ID,
-        clientSecret: process.env.COINBASE_CLIENT_SECRET,
-        isSecure: false     // Terrible idea but required if not using HTTPS especially if developing locally
-    });
-
+            coinbase: {
+                "key": process.env.COINBASE_CLINET_ID,
+                "secret": process.env.COINBASE_CLIENT_SECRET,
+                "scope": ["wallet:user:email", "wallet:user:read", "wallet:transaction:send"],
+        },}
+    },
+    require('hapi-auth-bearer-token')
+], function (err) {
+    if (err) {
+        throw err
+    }
     server.route({
         method: 'GET',
         path: '/',
@@ -55,37 +63,45 @@ server.register(bell, function (err) {
         }
     });
 
-
-    // Use the 'twitter' authentication strategy to protect the
-    // endpoint handling the incoming authentication credentials.
-    // This endpoints usually looks up the third party account in
-    // the database and sets some application state (cookie) with
-    // the local application account information.
-    server.route({
-        method: ['GET', 'POST'], // Must handle both GET and POST
-        path: '/login/coinbase/callback',          // The callback endpoint registered with the provider
-        config: {
-            auth: 'coinbase',
-            handler: function (request, reply) {
-
-                if (!request.auth.isAuthenticated) {
-                    return reply('Authentication failed due to: ' + request.auth.error.message);
-                }
-
-                // Perform any account lookup or registration, setup local session,
-                // and redirect to the application. The third-party credentials are
-                // stored in request.auth.credentials. Any query parameters from
-                // the initial request are passed back via request.auth.credentials.query.
-                return reply.redirect('/home');
-            }
+    server.auth.strategy('simple', 'bearer-access-token', {
+        allowQueryToken: false,
+        allowMultipleHeaders: false,
+        validateFunc: function (authToken, callback) {
+            // idToken comes from the client app (shown above)
+            server.app.firebase.auth().verifyIdToken(authToken).then(function(decodedToken) {
+                var uid = decodedToken.uid;
+                callback(null,true,{authToken: authToken, user: decodedToken});
+                // ...
+            }).catch(function(error) {
+                // Handle error
+                callback(null,false);
+            });
         }
     });
+    server.auth.default('simple');
+
+    server.route({
+        method: ['GET', 'POST'],
+        path: '/connect/coinbase/callback',
+        handler: function (req, reply) {
+            var userId = "";
+            console.log(req.query);
+            //todo exchange code for coinbase access key
+            //todo look up if customer is new or existing. if new,
+                //todo get profile information from coinbase (first name, last name, address), populate in firebase
+                //todo create capital one customer
+            //todo return the coinbase access key, refresh key, and firebase access token
+            reply(JSON.stringify({
+                coinbase_access_key: "",
+                coinbase_refresh_token: "",
+                firebase_access_token: server.app.firebase.auth().createCustomToken(userId)
+            }))
+    }});
 
     server.start((err) => {
-
         if (err) {
             throw err;
         }
-        console.log(`Server running at: ${server.info.uri}`);
+        //console.log(`Server running at: ${server.info.uri}`);
     });
 });
