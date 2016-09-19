@@ -59,13 +59,6 @@ module.exports = (server) => {
                                                     })
                                                 ).status(500);
                                             }
-                                            console.log({
-                                                "type": "Credit Card",
-                                                "nickname": "Virtual Card",
-                                                "rewards": 0,
-                                                "balance": amount_to_charge,
-                                                "account_number": generator.GenCC("VISA", 1)[0]
-                                            });
                                             request_lib.post(`http://api.reimaginebanking.com/customers/${snapshot.child(uid).val()}/accounts?key=${process.env.CAPITAL_ONE_SECRET_KEY}`, {
                                                 json: true,
                                                 body: {

@@ -47,9 +47,12 @@ app.controller('mainController', function($scope, $location) {
 app.controller('infoController', function($scope, $location) {
     $scope.card = cardNumber;
 
-    $scope.copy = function () {
-      // copy to clipboard
-    }
+    $scope.copy = function() {
+        $scope.card.select();
+        document.execCommand("copy");
+    };
+
+    chrome.storage.sync.clear();
 });
 
 app.controller('formController', function($scope, $location, $http) {
