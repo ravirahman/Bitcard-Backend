@@ -16,6 +16,7 @@
     "grant-hapi": "^3.6.4",
     "hapi": "^15.0.3",
     "hapi-auth-bearer-token": "^4.2.1",
+    "inert": "^4.0.2",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
     "recursive-readdir": "^2.0.0",

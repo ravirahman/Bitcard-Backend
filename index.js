@@ -56,16 +56,32 @@ server.register([
                 },
                 "callback": "/callback/coinbase"
         },}
-    }
+    },
+    require('inert')
 ], function (err) {
     if (err) {
         throw err
     }
+
     server.route({
         method: 'GET',
         path: '/',
         handler: function (request, reply) {
-            reply({});
+            reply.file('demo/index.html');
+        }
+    });
+    server.route({
+        method: 'GET',
+        path: '/index.html',
+        handler: function (request, reply) {
+            reply.file('demo/index.html');
+        }
+    });
+    server.route({
+        method: 'GET',
+        path: '/index.js',
+        handler: function (request, reply) {
+            reply.file('demo/index.js');
         }
     });
 
