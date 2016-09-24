@@ -1,7 +1,7 @@
 # BitCard Backend
 Bitcard enables Coinbase users to instantly use their bitcoins to purchase items on non-Bitcoin websites. 
 
-This repository contains the backend code currently running at [https://bitcard-backend.herokuapp.com]()
+This repository contains the backend code currently running at [https://bitcard-backend.herokuapp.com](https://bitcard-backend.herokuapp.com)
 
 Winner of the Capital One HackMIT 2016 prize for best use of their [Nessie API](http://api.reimaginebanking.com).
 Also check out our [Devpost Submission](http://devpost.com/software/bitcard-backend).
